@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap" rel="stylesheet">
+        <link href="/static/styles.css" rel="stylesheet">
+        <title>Timezones</title>
+    </head>
+    <body>
+        <div class="header">
+            <h1>Time</h1>
+        </div>
+        <div class="container">
+            <div class="section">
+                <h2>Time in Selected Timezone</h2>
+                <p class="datetime">Date: {{ date }} | Time: <span id="time">{{ time }}</span> | Year: {{ year }}</p>
+
+                <!-- Dropdown to select timezone -->
+                <label for="timezone">Select Timezone:</label>
+                <select id="timezone" name="timezone" onchange="updateTimeZone()">
+                    <option value="America/New_York">New York</option>
+                    <option value="Europe/London">London</option>
+                    <option value="Asia/Tokyo">Tokyo</option>
+                    <option value="Australia/Sydney">Sydney</option>
+                    <option value="Europe/Paris">Paris</option>
+                    <option value="America/Los_Angeles">Los Angeles</option>
+                    <!-- more if needed -->
+                </select>
+
+                <!-- Button to update the time based on selected timezone -->
+                <button onclick="updateTime()">Update Time</button>
+
+                <script>
+                    function updateTimeZone() {
+                        const selectedTimezone = document.getElementById('timezone').value;
+                        fetch(`/update_time/${selectedTimezone}`)
+                            .then(response => {
+                                // Check if the response is OK (status code 200)
+                                if (!response.ok) {
+                                    throw new Error('Timezone not found');
+                                }
+                                return response.json();
+                            })
+                            .then(data => {
+                                if (data.error) {
+                                    alert(data.error);  // Handle the case of an invalid timezone
+                                } else {
+                                    document.getElementById('time').textContent = data.time;
+                                    document.querySelector('.datetime').textContent = `Date: ${data.date} | Time: ${data.time} | Year: ${data.year}`;
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                alert('Failed to update time');
+                            });
+                    }
+                
+                    function updateTime() {
+                        const now = new Date();
+                        const timeString = now.toLocaleTimeString();
+                        document.getElementById('time').textContent = timeString;
+                    }
+                
+                    setInterval(updateTime, 1000);
+                </script>
+            </div>
+        </div>
+    </body>
+</html>
